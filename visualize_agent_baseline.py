@@ -13,7 +13,7 @@ from example_team_agent.agent import TeamAgent
 
 def main():
     # Absolute path to the multi-agent checkpoint file
-    checkpoint_path = r"d:\Georgia Tech\Second Year\Deep Reinforcement Learning\Final Project\github\soccer-twos-starter\checkpoints\PPO_SoccerShapedMA_2541d_00000_0_2026-02-21_13-57-19\checkpoint_001550\checkpoint-1550"
+    checkpoint_path = r"d:\Georgia Tech\Second Year\Deep Reinforcement Learning\Final Project\github\soccer-twos-starter\checkpoints\PPO_SoccerShapedMABaseline_cfd23_00000_0_2026-02-23_16-51-31\checkpoint_001650\checkpoint-1650"
 
     # Register the environment
     register_env("SoccerShapedMA", create_rllib_env)
