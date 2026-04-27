@@ -1,3 +1,7 @@
+import sys
+import os
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
 import ray
 from ray import tune
 from soccer_twos import EnvType
@@ -12,43 +16,42 @@ if __name__ == "__main__":
     ray.init()
 
     tune.registry.register_env("Soccer", create_rllib_env)
-    temp_env = create_rllib_env({"variation": EnvType.multiagent_team})
-    obs_space = temp_env.observation_space
-    act_space = temp_env.action_space
-    temp_env.close()
 
     analysis = tune.run(
         "PPO",
-        name="PPO_teams_1",
+        name="PPO_SP",
         config={
             # system settings
             "num_gpus": 1,
-            "num_workers": 6,
+            "num_workers": 8,
             "num_envs_per_worker": NUM_ENVS_PER_WORKER,
             "log_level": "INFO",
             "framework": "torch",
             # RL setup
-            "multiagent": {
-                "policies": {
-                    "default": (None, obs_space, act_space, {}),
-                },
-                "policy_mapping_fn": tune.function(lambda _: "default"),
-                "policies_to_train": ["default"],
-            },
             "env": "Soccer",
             "env_config": {
                 "num_envs_per_worker": NUM_ENVS_PER_WORKER,
-                "variation": EnvType.multiagent_team,
+                "variation": EnvType.team_vs_policy,
+                "multiagent": False,
+                "single_player": True,
+                "flatten_branched": True,
+                "opponent_policy": lambda *_: 0,
             },
+            "model": {
+                "vf_share_layers": True,
+                "fcnet_hiddens": [512],
+            },
+            "rollout_fragment_length": 500,
+            "train_batch_size": 12000,
         },
         stop={
-            "timesteps_total": 15000000,  # 15M
+            "timesteps_total": 20000000,  # 15M
             # "time_total_s": 14400, # 4h
         },
         checkpoint_freq=100,
         checkpoint_at_end=True,
         local_dir="./ray_results",
-        # restore="./ray_results/PPO_teams_1/PPO_Soccer_ID/checkpoint_00X/checkpoint-X",
+        # restore="./ray_results/PPO_selfplay_1/PPO_Soccer_ID/checkpoint_00X/checkpoint-X",
     )
 
     # Gets best trial based on max accuracy across all training iterations.

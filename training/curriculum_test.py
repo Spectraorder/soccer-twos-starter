@@ -1,13 +1,45 @@
-import random
+import sys
+import os
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+import time
+import yaml
 
 import soccer_twos
 from soccer_twos import EnvType
+from utils import sample_pos_vel, sample_player
+
+current = 0
+with open("curriculum.yaml") as f:
+    curriculum = yaml.load(f, Loader=yaml.FullLoader)
+tasks = curriculum["tasks"]
+config_fns = {
+    "none": lambda *_: None,
+    "random_players": lambda env: env.set_policies(
+        lambda *_: env.action_space.sample()
+    ),
+}
+
+
+def reset_env(_env):
+    print("task: ", tasks[current]["name"])
+    _env.reset()
+    print("appling config", tasks[current]["config_fn"])
+    config_fns[tasks[current]["config_fn"]](env)
+    print("setting parameters")
+    _env.env_channel.set_parameters(
+        ball_state=sample_pos_vel(tasks[current]["ranges"]["ball"]),
+        players_states={
+            player: sample_player(tasks[current]["ranges"]["players"][player])
+            for player in tasks[current]["ranges"]["players"]
+        },
+    )
 
 
 env = soccer_twos.make(
     base_port=8500,
-    # render=True,
-    watch=True,
+    render=True,
+    # watch=True,
     flatten_branched=True,
     # time_scale=1,
     variation=EnvType.team_vs_policy,
@@ -20,34 +52,14 @@ print("Action Space: ", env.action_space)
 step = 0
 team0_reward = 0
 team1_reward = 0
-env.reset()
+reset_env(env)
 
-env.env_channel.set_parameters(
-    # ball_state={
-    #     "position": [-14, 0],
-    #     "velocity": [10, 0],
-    # },
-    players_states={
-        1: {"rotation_y": 45, "position": [-14, 1.5],},
-        # 1: {
-        #     # "rotation_y": 45,
-        #     "position": [-6, -1.5],
-        # },
-        # 2: {
-        #     # "rotation_y": 45,
-        #     "position": [6, 1.5],
-        # },
-        # 3: {
-        #     # "rotation_y": 45,
-        #     "position": [1, 1],
-        # },
-    },
-)
-
-
+time.sleep(2)
+print("go")
 while True:
     obs, reward, done, info = env.step(
-        26
+        0
+        # env.action_space.sample()
         # {
         #     0: 0,
         #     1: 0,
@@ -59,10 +71,6 @@ while True:
         #     # 3: env.action_space.sample(),
         # }
     )
-
-    if step == 30:
-        print("updating policy")
-        env.set_opponent_policy(lambda *_: env.action_space.sample())
 
     # team0_reward += reward[0] + reward[1]
     # team1_reward += reward[2] + reward[3]
@@ -77,4 +85,8 @@ while True:
         step = 0
         team0_reward = 0
         team1_reward = 0
-        env.reset()
+        reset_env(env)
+
+        if current < len(tasks) - 1:
+            current += 1
+            reset_env(env)

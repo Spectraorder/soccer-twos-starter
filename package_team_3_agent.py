@@ -2,7 +2,7 @@ import os
 import shutil
 
 def main():
-    root_dir = r"d:\Georgia Tech\Second Year\Deep Reinforcement Learning\Final Project\github\soccer-twos-starter"
+    root_dir = os.path.dirname(os.path.abspath(__file__))
     agent_dir = os.path.join(root_dir, "team_3_agent")
     
     if not os.path.exists(agent_dir):

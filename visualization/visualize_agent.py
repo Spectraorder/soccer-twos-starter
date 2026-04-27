@@ -1,3 +1,7 @@
+import sys
+import os
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
 import random
 import ray
 import ray.rllib.agents.ppo as ppo
@@ -9,7 +13,7 @@ import os
 
 def main():
     # Absolute path to the checkpoint file
-    checkpoint_path = r"d:\Georgia Tech\Second Year\Deep Reinforcement Learning\Final Project\github\soccer-twos-starter\checkpoints\PPO_SoccerShaped_bec43_00000_0_2026-02-19_16-48-37\checkpoint_000167\checkpoint-167"
+    checkpoint_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "checkpoints", "PPO_SoccerShaped_bec43_00000_0_2026-02-19_16-48-37", "checkpoint_000167", "checkpoint-167"))
 
     # Register the environment
     register_env("SoccerShaped", create_rllib_env)

@@ -1,30 +1,33 @@
+import sys
+import os
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
 import ray
 from ray import tune
-from soccer_twos import EnvType
+from soccer_twos import EnvType, make
 
 from utils import create_rllib_env
 
-
+# Use same config as example_ray_ppo_sp_still.py but add shaped_reward=True
 NUM_ENVS_PER_WORKER = 3
-
 
 if __name__ == "__main__":
     ray.init()
 
-    tune.registry.register_env("Soccer", create_rllib_env)
+    tune.registry.register_env("SoccerShaped", create_rllib_env)
 
     analysis = tune.run(
         "PPO",
-        name="PPO_SP",
+        name="PPO_Shaped",
         config={
             # system settings
             "num_gpus": 1,
-            "num_workers": 8,
+            "num_workers": 8, # Use 4 workers to reduce load if needed, but keeping 8 as in example
             "num_envs_per_worker": NUM_ENVS_PER_WORKER,
             "log_level": "INFO",
             "framework": "torch",
             # RL setup
-            "env": "Soccer",
+            "env": "SoccerShaped",
             "env_config": {
                 "num_envs_per_worker": NUM_ENVS_PER_WORKER,
                 "variation": EnvType.team_vs_policy,
@@ -32,6 +35,7 @@ if __name__ == "__main__":
                 "single_player": True,
                 "flatten_branched": True,
                 "opponent_policy": lambda *_: 0,
+                "shaped_reward": True, # Triggers our wrapper
             },
             "model": {
                 "vf_share_layers": True,
@@ -41,13 +45,12 @@ if __name__ == "__main__":
             "train_batch_size": 12000,
         },
         stop={
-            "timesteps_total": 20000000,  # 15M
+            "timesteps_total": 2000000, # 2M for quicker test, original was 20M
             # "time_total_s": 14400, # 4h
         },
-        checkpoint_freq=100,
+        checkpoint_freq=50, # More frequent checkpoints for testing
         checkpoint_at_end=True,
-        local_dir="./ray_results",
-        # restore="./ray_results/PPO_selfplay_1/PPO_Soccer_ID/checkpoint_00X/checkpoint-X",
+        local_dir="./ray_results_shaped",
     )
 
     # Gets best trial based on max accuracy across all training iterations.
