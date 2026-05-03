@@ -6,9 +6,7 @@ Example training/testing scripts for the Soccer-Twos environment. This starter c
 Environment-level specification code can be found at https://github.com/bryanoliveira/soccer-twos-env, which may also be useful to reference.
 
 ## Gameplay Demo
-<p align="center">
-  <img src="materials/soccer_two.gif" width="800">
-</p>
+
 
 ## Requirements
 
