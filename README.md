@@ -5,6 +5,9 @@ Example training/testing scripts for the Soccer-Twos environment. This starter c
 
 Environment-level specification code can be found at https://github.com/bryanoliveira/soccer-twos-env, which may also be useful to reference.
 
+## Gameplay Demo
+<video src="materials/soccer_two.mp4" controls width="600"></video>
+
 ## Requirements
 
 - Python 3.8
