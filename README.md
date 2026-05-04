@@ -1,6 +1,6 @@
 # CS8803 DRL Team 3 agent
 
-**Authors:** Yiming Chen and Wuyang Du
+**Authors:** Yiming Chen (ychen3868@gatech.edu) and Wuyang Du (wuyang_du@gatech.edu)
 
 Example training/testing scripts for the Soccer-Twos environment. This starter code is modified from the example code provided in https://github.com/bryanoliveira/soccer-twos-starter.
 
